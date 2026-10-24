@@ -1,0 +1,17 @@
+# ============================================================
+# 可选：MinerU 高精度文档解析（PDF → Markdown + 表格结构化）
+#
+# 注意：体积很大。会额外拉入 torch 组件、onnxruntime、
+# 各种检测/识别模型，安装后约 4-6 GB，首次运行还要下载
+# 约 1-2 GB 模型权重到 HF 缓存。
+#
+# 什么时候需要装：
+#   - 有真实扫描版地质 PDF / 复杂表格勘查报告要解析时
+#   - Demo 阶段只有 Markdown 或少量文字版 PDF 时，先用 pymupdf
+#     回退方案就够，不必装
+#
+# 安装（需在 core 依赖和 torch 之后）：
+#   pip install -r requirements-mineru.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# ============================================================
+
+mineru[core]>=2.5.0

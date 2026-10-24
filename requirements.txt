@@ -1,0 +1,76 @@
+# ============================================================
+# 地质大模型 Demo — 核心依赖（必装）
+# 对应代码中真实 import 的包，不含未使用的依赖
+# 安装: pip install -r requirements.txt
+# ============================================================
+
+# --- 配置与基础 ---
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# --- LLM API (DeepSeek 兼容 OpenAI SDK) ---
+openai>=1.30.0
+
+# --- Embedding + Reranker (bge-m3 / bge-reranker-v2-m3) ---
+# FlagEmbedding 自带的 transformers<6 上限挡不住 transformers 5（它要求 torch>=2.6），
+# 所以这里必须显式把 transformers 钉在 4.x，见文件末尾"版本约束链"
+FlagEmbedding>=1.2.11
+transformers>=4.44.2,<5.0
+sentence-transformers>=5.0,<6.0
+
+# --- 向量数据库 ---
+chromadb>=0.5.0
+
+# --- 知识图谱 ---
+neo4j>=5.20.0
+lightrag-hku>=1.5.0
+
+# --- 文档解析 (Markdown/TXT/Word/Excel；PDF 走 pymupdf) ---
+python-docx>=1.1.0
+pymupdf>=1.24.0
+pdfplumber>=0.11.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# --- 评测 (RAGAS 需要 langchain 桥接) ---
+# ragas>=0.3.3 要 datasets>=4，datasets>=4 要 huggingface-hub>=1.31，
+# 而 transformers 4.x 只接受 hub<1.0 —— 所以 ragas 必须停在 0.3.2
+ragas>=0.3.0,<0.3.3
+datasets>=3.0,<4.0
+langchain-openai>=0.2.0
+langchain-core>=0.3.0
+# 0.4.2 删掉了 chat_models/vertexai，ragas 0.3.2 仍会 import 它
+langchain-community>=0.4,<0.4.2
+
+# --- Web UI ---
+streamlit>=1.35.0
+
+# --- 工具 ---
+tqdm>=4.66.0
+aiofiles>=23.0
+requests>=2.31.0
+
+# ============================================================
+# torch 由 setup_env.bat 单独安装（CPU 或 CUDA 版本二选一）
+# FlagEmbedding / sentence-transformers 依赖 torch，需先装好
+# MinerU 为可选重型依赖，见 requirements-mineru.txt
+# ============================================================
+#
+# 版本约束链（2026-10-24 定位，别随手放开上限）
+# ------------------------------------------------------------
+# setup_env.bat 装的是 CUDA 12.1 轮子 -> torch 最高只能到 2.5.1
+#   transformers>=5.0 硬性要求 torch>=2.6，否则 is_torch_available()
+#   返回 False，transformers/integrations/accelerate.py 里的
+#   "import torch.nn as nn" 不执行，第 65 行的注解直接
+#   NameError: name 'nn' is not defined -> FlagEmbedding 无法导入
+#   => 所以 transformers 必须 <5.0
+# transformers 4.x 要求 huggingface-hub<1.0
+#   => datasets 必须 <4.0（datasets 4/5 要 hub>=1.x）
+#   => ragas 必须 <0.3.3（要 datasets>=4）
+# sentence-transformers>=6.0 要求 transformers>=5.0
+#   => 必须 <6.0
+#
+# 想放开这些上限，只有一条路：把 torch 升到 >=2.6
+# （setup_env.bat 里的 cu121 换成 cu124/cu126，约 3 GB 下载），
+# 那时可以整体回到最新栈：transformers 5 + hub 2 + datasets 5 + ragas 0.4。
+# ============================================================
